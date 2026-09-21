@@ -1,0 +1,32 @@
+name: Testes
+
+# Executa a bateria de testes a cada envio de codigo e a cada pull request.
+# O resultado verde e a evidencia do item "testes" do tema norteador do PI2.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o codigo
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar as dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Rodar os testes
+        run: pytest -v

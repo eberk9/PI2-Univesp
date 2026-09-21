@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block titulo %}Encomendas pendentes{% endblock %}
+
+{% block conteudo %}
+<h1>Encomendas pendentes</h1>
+
+<div class="cartao">
+  <form id="form-busca" role="search" novalidate>
+    <div class="campo campo--busca">
+      <label for="q">Buscar por código, unidade ou destinatário</label>
+      <input type="search" id="q" name="q" autocomplete="off"
+             aria-describedby="ajuda-busca">
+      <small id="ajuda-busca" class="ajuda">A lista é atualizada conforme você digita.</small>
+    </div>
+    <div class="campo">
+      <label for="situacao">Situação</label>
+      <select id="situacao" name="situacao">
+        <option value="RECEBIDA" selected>Aguardando retirada</option>
+        <option value="RETIRADA">Já retiradas</option>
+        <option value="DEVOLVIDA">Devolvidas</option>
+        <option value="">Todas</option>
+      </select>
+    </div>
+  </form>
+</div>
+
+<p id="contador" class="contador" role="status" aria-live="polite">Carregando…</p>
+
+<div class="tabela-rolagem">
+  <table class="tabela">
+    <caption class="visualmente-oculto">Lista de encomendas registradas na portaria</caption>
+    <thead>
+      <tr>
+        <th scope="col">Código</th>
+        <th scope="col">Unidade</th>
+        <th scope="col">Destinatário</th>
+        <th scope="col">Recebida em</th>
+        <th scope="col">Situação</th>
+        <th scope="col">Ações</th>
+      </tr>
+    </thead>
+    <tbody id="corpo-tabela"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pendentes.js') }}"></script>
+{% endblock %}

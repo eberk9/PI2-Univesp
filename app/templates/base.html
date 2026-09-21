@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Controle de Encomendas{% endblock %} — Portaria</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <a class="pular-para-conteudo" href="#conteudo">Pular para o conteúdo principal</a>
+
+  {% if current_user.is_authenticated %}
+  <header class="cabecalho">
+    <div class="cabecalho__marca">
+      <strong>Controle de Encomendas</strong>
+      <span class="cabecalho__local">Residencial Terras de Ártemis</span>
+    </div>
+    <nav class="cabecalho__nav" aria-label="Navegação principal">
+      <ul>
+        {% if not current_user.e_morador() %}
+          <li><a href="{{ url_for('main.pendentes') }}">Pendentes</a></li>
+          <li><a href="{{ url_for('main.nova_encomenda') }}">Registrar encomenda</a></li>
+        {% else %}
+          <li><a href="{{ url_for('main.minhas_encomendas') }}">Minhas encomendas</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    <div class="cabecalho__usuario">
+      <span>{{ current_user.nome }} <span class="etiqueta">{{ current_user.perfil|lower }}</span></span>
+      <a href="{{ url_for('auth.logout') }}">Sair</a>
+    </div>
+  </header>
+  {% endif %}
+
+  <main id="conteudo" class="conteudo">
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% if mensagens %}
+        <div role="status" aria-live="polite">
+          {% for categoria, mensagem in mensagens %}
+            <p class="aviso aviso--{{ categoria }}">{{ mensagem }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block conteudo %}{% endblock %}
+  </main>
+
+  <footer class="rodape">
+    <p>Projeto Integrador em Computação II — UNIVESP, Polo Piracicaba, 2026.</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

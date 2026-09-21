@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titulo %}Encomenda {{ encomenda.codigo_rastreio }}{% endblock %}
+
+{% block conteudo %}
+<h1>Encomenda {{ encomenda.codigo_rastreio }}</h1>
+
+<div class="cartao">
+  <dl class="ficha">
+    <dt>Situação</dt>
+    <dd><span class="etiqueta etiqueta--{{ encomenda.situacao|lower }}">{{ encomenda.situacao|lower }}</span></dd>
+
+    <dt>Unidade</dt>
+    <dd>{{ encomenda.unidade.identificacao }}</dd>
+
+    <dt>Destinatário</dt>
+    <dd>{{ encomenda.destinatario }}</dd>
+
+    <dt>Transportadora</dt>
+    <dd>{{ encomenda.transportadora.nome if encomenda.transportadora else 'Não informada' }}</dd>
+
+    <dt>Recebida em</dt>
+    <dd>{{ encomenda.recebida_em.strftime('%d/%m/%Y às %H:%M') }} por {{ encomenda.recebida_por.nome }}</dd>
+
+    {% if encomenda.retirada_em %}
+    <dt>Retirada em</dt>
+    <dd>{{ encomenda.retirada_em.strftime('%d/%m/%Y às %H:%M') }} por {{ encomenda.retirada_por_nome }},
+        entregue por {{ encomenda.entregue_por.nome }}</dd>
+    {% endif %}
+
+    {% if encomenda.observacao %}
+    <dt>Observação</dt>
+    <dd>{{ encomenda.observacao }}</dd>
+    {% endif %}
+  </dl>
+</div>
+
+<h2>Histórico</h2>
+<div class="cartao">
+  <ol class="historico">
+    {% for mov in encomenda.movimentacoes %}
+      <li>
+        <time datetime="{{ mov.ocorrida_em.isoformat() }}">{{ mov.ocorrida_em.strftime('%d/%m/%Y %H:%M') }}</time>
+        <strong>{{ mov.tipo|lower|replace('_', ' ') }}</strong>
+        <span>{{ mov.descricao }}</span>
+        {% if mov.usuario %}<span class="ajuda">Registrado por {{ mov.usuario.nome }}</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+</div>
+
+<p><a href="{{ url_for('main.inicio') }}">Voltar</a></p>
+{% endblock %}

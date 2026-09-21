@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titulo %}Registrar encomenda{% endblock %}
+
+{% block conteudo %}
+<h1>Registrar encomenda</h1>
+<p class="subtitulo">A data, a hora e o porteiro responsável são preenchidos automaticamente.</p>
+
+<div class="cartao">
+  <form id="form-encomenda" novalidate>
+    <div class="campo">
+      <label for="codigo_rastreio">Código de rastreio</label>
+      <input type="text" id="codigo_rastreio" name="codigo_rastreio"
+             required autofocus autocapitalize="characters" autocomplete="off"
+             aria-describedby="ajuda-codigo">
+      <small id="ajuda-codigo" class="ajuda">Copie da etiqueta da transportadora.</small>
+    </div>
+
+    <div class="campo">
+      <label for="unidade_id">Unidade de destino</label>
+      <select id="unidade_id" name="unidade_id" required>
+        <option value="">Selecione a unidade</option>
+        {% for unidade in unidades %}
+          <option value="{{ unidade.id }}">{{ unidade.identificacao }}{% if unidade.descricao %} — {{ unidade.descricao }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="destinatario">Destinatário</label>
+      <input type="text" id="destinatario" name="destinatario" required
+             autocomplete="off">
+    </div>
+
+    <div class="campo">
+      <label for="transportadora_id">Transportadora <span class="opcional">(opcional)</span></label>
+      <select id="transportadora_id" name="transportadora_id">
+        <option value="">Não informada</option>
+        {% for t in transportadoras %}
+          <option value="{{ t.id }}">{{ t.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="observacao">Observação <span class="opcional">(opcional)</span></label>
+      <input type="text" id="observacao" name="observacao" maxlength="255"
+             placeholder="Ex.: embalagem danificada">
+    </div>
+
+    <button type="submit" class="botao botao--primario">Registrar encomenda</button>
+  </form>
+
+  <div id="resultado" role="status" aria-live="polite"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/nova_encomenda.js') }}"></script>
+{% endblock %}

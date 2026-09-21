@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Minhas encomendas{% endblock %}
+
+{% block conteudo %}
+<h1>Minhas encomendas</h1>
+<p class="subtitulo">Unidade {{ current_user.unidade.identificacao if current_user.unidade else 'não vinculada' }}</p>
+
+<p id="contador" class="contador" role="status" aria-live="polite">Carregando…</p>
+
+<div class="tabela-rolagem">
+  <table class="tabela">
+    <caption class="visualmente-oculto">Encomendas destinadas à sua unidade</caption>
+    <thead>
+      <tr>
+        <th scope="col">Código</th>
+        <th scope="col">Destinatário</th>
+        <th scope="col">Recebida em</th>
+        <th scope="col">Situação</th>
+      </tr>
+    </thead>
+    <tbody id="corpo-tabela"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/minhas_encomendas.js') }}"></script>
+{% endblock %}
