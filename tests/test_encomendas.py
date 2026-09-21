@@ -198,3 +198,21 @@ def test_indicadores(porteiro_logado, unidade_id):
     assert dados["pendentes"] == 1
     assert dados["retiradas"] == 1
     assert dados["tempo_medio_retirada_horas"] is not None
+
+
+# ------------------------------------------------------------------ fuso
+def test_horario_gravado_e_o_da_portaria(porteiro_logado, unidade_id):
+    """Os horarios sao os de Piracicaba/SP, nao os do servidor (UTC).
+
+    Sem isso, a portaria veria toda encomenda 3 horas adiantada.
+    """
+    from datetime import datetime
+
+    from app.extensions import db
+    from app.models import FUSO, Encomenda
+
+    encomenda_id = registrar(porteiro_logado, unidade_id).get_json()["id"]
+    gravado = db.session.get(Encomenda, encomenda_id).recebida_em
+    esperado = datetime.now(FUSO).replace(tzinfo=None)
+
+    assert abs((esperado - gravado).total_seconds()) < 60

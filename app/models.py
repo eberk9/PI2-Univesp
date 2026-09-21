@@ -3,17 +3,24 @@
 O esquema segue o Apendice A do Relatorio Parcial: cinco entidades, com o
 historico de cada encomenda preservado na tabela de movimentacoes.
 """
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db, login_manager
 
+# O sistema atende uma unica portaria, em Piracicaba/SP. Gravamos o horario
+# local dela: o servidor de producao roda em UTC, e tanto o template quanto o
+# JavaScript exibem o valor como veio, sem converter. Usar UTC aqui faria a
+# portaria ver todos os horarios 3 horas adiantados.
+FUSO = ZoneInfo("America/Sao_Paulo")
+
 
 def agora():
-    """Momento atual em UTC, sem tzinfo (compativel com MySQL DATETIME)."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    """Momento atual no fuso da portaria, sem tzinfo (compativel com MySQL)."""
+    return datetime.now(FUSO).replace(tzinfo=None)
 
 
 # Perfis de usuario
