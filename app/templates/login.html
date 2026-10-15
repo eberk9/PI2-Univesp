@@ -6,10 +6,11 @@
   <header class="cartao__cabecalho">
     <img class="cartao__logo"
          src="{{ url_for('static', filename='img/logo-terras-de-artemis.jpg') }}"
-         alt="Logotipo do Residencial Terras de Ártemis"
-         width="304" height="304">
-    <h1>Controle de Encomendas</h1>
-    <p class="subtitulo">Residencial Terras de Ártemis</p>
+         alt="" width="304" height="304">
+    <div class="cartao__titulos">
+      <h1>Controle de Encomendas</h1>
+      <p class="subtitulo">Residencial Terras de Ártemis</p>
+    </div>
   </header>
 
   <form method="post" action="{{ url_for('auth.login') }}" novalidate>
