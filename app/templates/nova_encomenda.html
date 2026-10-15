@@ -7,6 +7,8 @@
 
 <div class="cartao">
   <form id="form-encomenda" novalidate>
+    <p class="nota-formulario">Campos sem “(opcional)” são obrigatórios.</p>
+
     <div class="campo">
       <label for="codigo_rastreio">Código de rastreio</label>
       <input type="text" id="codigo_rastreio" name="codigo_rastreio"
@@ -43,8 +45,9 @@
 
     <div class="campo">
       <label for="observacao">Observação <span class="opcional">(opcional)</span></label>
-      <input type="text" id="observacao" name="observacao" maxlength="255"
-             placeholder="Ex.: embalagem danificada">
+      <textarea id="observacao" name="observacao" rows="3" maxlength="255"
+                aria-describedby="ajuda-observacao"></textarea>
+      <small id="ajuda-observacao" class="ajuda">Ex.: embalagem danificada. Máximo de 255 caracteres.</small>
     </div>
 
     <button type="submit" class="botao botao--primario">Registrar encomenda</button>
