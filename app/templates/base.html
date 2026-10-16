@@ -12,16 +12,21 @@
   {% if current_user.is_authenticated %}
   <header class="cabecalho">
     <div class="cabecalho__marca">
-      <strong>Controle de Encomendas</strong>
-      <span class="cabecalho__local">Residencial Terras de Ártemis</span>
+      <img class="cabecalho__logo"
+           src="{{ url_for('static', filename='img/logo-terras-de-artemis.jpg') }}"
+           alt="" width="56" height="56">
+      <div class="cabecalho__titulos">
+        <strong>Controle de Encomendas</strong>
+        <span class="cabecalho__local">Residencial Terras de Ártemis</span>
+      </div>
     </div>
     <nav class="cabecalho__nav" aria-label="Navegação principal">
       <ul>
         {% if not current_user.e_morador() %}
-          <li><a href="{{ url_for('main.pendentes') }}">Pendentes</a></li>
-          <li><a href="{{ url_for('main.nova_encomenda') }}">Registrar encomenda</a></li>
+          <li><a href="{{ url_for('main.pendentes') }}"{% if request.endpoint == 'main.pendentes' %} aria-current="page"{% endif %}>Pendentes</a></li>
+          <li><a href="{{ url_for('main.nova_encomenda') }}"{% if request.endpoint == 'main.nova_encomenda' %} aria-current="page"{% endif %}>Registrar encomenda</a></li>
         {% else %}
-          <li><a href="{{ url_for('main.minhas_encomendas') }}">Minhas encomendas</a></li>
+          <li><a href="{{ url_for('main.minhas_encomendas') }}"{% if request.endpoint == 'main.minhas_encomendas' %} aria-current="page"{% endif %}>Minhas encomendas</a></li>
         {% endif %}
       </ul>
     </nav>
@@ -32,12 +37,12 @@
   </header>
   {% endif %}
 
-  <main id="conteudo" class="conteudo">
+  <main id="conteudo" class="conteudo" tabindex="-1">
     {% with mensagens = get_flashed_messages(with_categories=true) %}
       {% if mensagens %}
-        <div role="status" aria-live="polite">
+        <div>
           {% for categoria, mensagem in mensagens %}
-            <p class="aviso aviso--{{ categoria }}">{{ mensagem }}</p>
+            <p class="aviso aviso--{{ categoria }}" role="{{ 'alert' if categoria == 'erro' else 'status' }}">{{ mensagem }}</p>
           {% endfor %}
         </div>
       {% endif %}
