@@ -1,4 +1,7 @@
 """Recursos de encomenda: listagem, registro, retirada e devolucao."""
+import unicodedata
+from sqlalchemy import func
+
 from datetime import datetime
 
 from flask import jsonify, request
@@ -32,12 +35,36 @@ def _data(texto):
         return None
 
 
+def remover_acentos(texto):
+    """Remove acentos de uma string Python comum."""
+    if not texto:
+        return ""
+    nfkd = unicodedata.normalize('NFD', texto)
+    return "".join([c for c in nfkd if not unicodedata.combining(c)])
+
+
+def normalizar_coluna_sql(coluna):
+    """Gera uma expressão SQL que substitui vogais acentuadas na coluna do banco."""
+    acentos = [
+        ('á', 'a'), ('à', 'a'), ('ã', 'a'), ('â', 'a'), ('ä', 'a'),
+        ('é', 'e'), ('ê', 'e'), ('ë', 'e'),
+        ('í', 'i'), ('î', 'i'), ('ï', 'i'),
+        ('ó', 'o'), ('ô', 'o'), ('õ', 'o'), ('ö', 'o'),
+        ('ú', 'u'), ('û', 'u'), ('ü', 'u'),
+        ('ç', 'c')
+    ]
+    expressao = func.lower(coluna)
+    for com_acento, sem_acento in acentos:
+        expressao = func.replace(expressao, com_acento, sem_acento)
+    return expressao
+
+
 @api_bp.get("/encomendas")
 @exige_login
 def listar_encomendas():
     consulta = db.select(Encomenda)
 
-    # Morador so enxerga o que e destinado a sua unidade.
+    # Morador só enxerga o que é destinado a sua unidade.
     if current_user.e_morador():
         if current_user.unidade_id is None:
             return jsonify({"encomendas": [], "total": 0})
@@ -60,11 +87,12 @@ def listar_encomendas():
 
     termo = (request.args.get("q") or "").strip()
     if termo:
-        curinga = f"%{termo}%"
+        termo_limpo = remover_acentos(termo).lower()
+        curinga = f"%{termo_limpo}%"
         consulta = consulta.join(Unidade).filter(
             db.or_(
                 Encomenda.codigo_rastreio.ilike(curinga),
-                Encomenda.destinatario.ilike(curinga),
+                normalizar_coluna_sql(Encomenda.destinatario).like(curinga),
                 Unidade.numero.ilike(curinga),
             )
         )
@@ -75,7 +103,6 @@ def listar_encomendas():
     return jsonify(
         {"encomendas": [e.to_dict() for e in encomendas], "total": len(encomendas)}
     )
-
 
 @api_bp.post("/encomendas")
 @exige_perfil(PERFIL_PORTEIRO, PERFIL_SINDICO)
