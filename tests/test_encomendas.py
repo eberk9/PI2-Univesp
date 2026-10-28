@@ -156,6 +156,21 @@ def test_busca_por_codigo_e_por_destinatario(porteiro_logado, unidade_id):
     assert por_nome["encomendas"][0]["destinatario"] == "Carlos Menezes"
 
 
+# ---------------------------------------------------------------------
+def test_busca_por_destinatario_com_acento(porteiro_logado, unidade_id):
+    registrar(
+        porteiro_logado,
+        unidade_id,
+        codigo="ACENTO001",
+        destinatario="Álvaro",
+    )
+
+    resposta = porteiro_logado.get("/api/v1/encomendas?q=alvaro").get_json()
+
+    assert resposta["total"] == 1
+    assert resposta["encomendas"][0]["destinatario"] == "Álvaro"
+
+
 # --------------------------------------------------------------------- RF11
 def test_morador_so_ve_a_propria_unidade(
     client, porteiro_logado, unidade_id, unidade_b_id

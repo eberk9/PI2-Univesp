@@ -1,5 +1,6 @@
 """Recursos de encomenda: listagem, registro, retirada e devolucao."""
 from datetime import datetime
+import unicodedata
 
 from flask import jsonify, request
 from flask_login import current_user
@@ -22,6 +23,16 @@ from app.models import (
     agora,
     registrar_movimentacao,
 )
+
+
+def _normalizar_texto(texto):
+    """Remove acentos e converte o texto para minusculas."""
+    texto = unicodedata.normalize("NFD", texto.casefold())
+    return "".join(
+        caractere
+        for caractere in texto
+        if unicodedata.category(caractere) != "Mn"
+    )
 
 
 def _data(texto):
@@ -54,19 +65,32 @@ def listar_encomendas():
     de = _data(request.args.get("de"))
     if de:
         consulta = consulta.filter(Encomenda.recebida_em >= de)
+
     ate = _data(request.args.get("ate"))
     if ate:
-        consulta = consulta.filter(Encomenda.recebida_em < ate.replace(hour=23, minute=59, second=59))
+        consulta = consulta.filter(
+            Encomenda.recebida_em < ate.replace(hour=23, minute=59, second=59)
+        )
 
-    termo = (request.args.get("q") or "").strip()
+    termo = _normalizar_texto((request.args.get("q") or "").strip())
     if termo:
-        curinga = f"%{termo}%"
-        consulta = consulta.join(Unidade).filter(
-            db.or_(
-                Encomenda.codigo_rastreio.ilike(curinga),
-                Encomenda.destinatario.ilike(curinga),
-                Unidade.numero.ilike(curinga),
-            )
+        encomendas = db.session.scalars(
+            consulta.order_by(Encomenda.recebida_em.desc())
+        ).all()
+
+        encomendas = [
+            encomenda
+            for encomenda in encomendas
+            if termo in _normalizar_texto(encomenda.codigo_rastreio)
+            or termo in _normalizar_texto(encomenda.destinatario)
+            or termo in _normalizar_texto(encomenda.unidade.numero)
+        ]
+
+        return jsonify(
+            {
+                "encomendas": [e.to_dict() for e in encomendas],
+                "total": len(encomendas),
+            }
         )
 
     encomendas = db.session.scalars(
