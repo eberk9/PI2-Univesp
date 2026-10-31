@@ -73,11 +73,12 @@ def listar_encomendas():
         )
 
     termo = _normalizar_texto((request.args.get("q") or "").strip())
-    if termo:
-        encomendas = db.session.scalars(
-            consulta.order_by(Encomenda.recebida_em.desc())
-        ).all()
 
+    encomendas = db.session.scalars(
+        consulta.order_by(Encomenda.recebida_em.desc())
+    ).all()
+
+    if termo:
         encomendas = [
             encomenda
             for encomenda in encomendas
@@ -86,19 +87,10 @@ def listar_encomendas():
             or termo in _normalizar_texto(encomenda.unidade.numero)
         ]
 
-        return jsonify(
-            {
-                "encomendas": [e.to_dict() for e in encomendas],
-                "total": len(encomendas),
-            }
-        )
-
-    encomendas = db.session.scalars(
-        consulta.order_by(Encomenda.recebida_em.desc())
-    ).all()
     return jsonify(
         {"encomendas": [e.to_dict() for e in encomendas], "total": len(encomendas)}
     )
+
 
 
 @api_bp.post("/encomendas")
