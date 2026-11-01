@@ -118,4 +118,4 @@ Anderson Alexandre Robles · Beatriz Fernanda Alves Fuentes · Eber Constantinov
 Eduardo Lopes · Isac Matheus de Carvalho Lopes · Pedro Donizete da Costa Filho ·
 Renan Polesi
 
-Orientadora: Milena Rosa de Souza.
+Orientadora: Milena Rosa de Sousa.
