@@ -114,8 +114,8 @@ Filtros de `GET /encomendas`: `?situacao=&unidade=&de=&ate=&q=`.
 
 ## Equipe
 
-Anderson Alexandre Robles · Beatriz Fernanda Alves Fuentes · Eber Constantinov ·
-Eduardo Lopes · Isac Matheus de Carvalho Lopes · Pedro Donizete da Costa Filho ·
-Renan Polesi
+Anderson Alexandre Robles · Eber Constantinov · Eduardo Lopes ·
+Isac Matheus de Carvalho Lopes · Pedro Donizete da Costa Filho · Renan Polesi ·
+Rogério Moreira
 
 Orientadora: Milena Rosa de Sousa.
