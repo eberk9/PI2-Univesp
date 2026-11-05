@@ -72,25 +72,33 @@
   const campo = document.getElementById('codigo_rastreio');
   if (!botao || !('BarcodeDetector' in window)) return;
 
-  const LINEARES = ['code_128', 'code_39', 'code_93', 'codabar', 'ean_13', 'itf'];
+  const LINEARES = [
+    'code_128', 'code_39', 'code_93', 'codabar',
+    'ean_13', 'ean_8', 'upc_a', 'upc_e', 'itf',
+  ];
   const suportados = await BarcodeDetector.getSupportedFormats();
   const formatos = LINEARES.filter((f) => suportados.includes(f));
   if (formatos.length === 0) return;
 
   const leitor = new BarcodeDetector({ formats: formatos });
+  const ajuda = document.getElementById('ajuda-codigo');
+  const ajudaOriginal = ajuda.textContent;
   let fluxo = null;
+  let falhas = 0;
 
   function parar() {
     if (fluxo) fluxo.getTracks().forEach((t) => t.stop());
     fluxo = null;
     video.hidden = true;
     botao.textContent = 'Ler com a câmera';
+    ajuda.textContent = ajudaOriginal;
   }
 
   async function procurar() {
     if (!fluxo) return;
     try {
       const achados = await leitor.detect(video);
+      falhas = 0;
       if (achados.length > 0) {
         campo.value = achados[0].rawValue.trim().toUpperCase();
         limparErro(campo);
@@ -99,7 +107,14 @@
         return;
       }
     } catch (erro) {
-      /* quadro ainda nao disponivel; tenta no proximo */
+      /* quadro ainda nao disponivel; tenta no proximo, mas desiste se o
+         leitor falhar sempre, para o porteiro nao ficar esperando a toa */
+      falhas += 1;
+      if (falhas > 20) {
+        parar();
+        marcarErro(campo, 'O leitor do navegador falhou (' + erro.name + '). Digite o código.');
+        return;
+      }
     }
     setTimeout(procurar, 250);
   }
@@ -112,7 +127,14 @@
     limparErro(campo);
     try {
       fluxo = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        // Resolucao alta e foco continuo: em 640x480, o padrao, as barras
+        // finas da etiqueta nao sao reconhecidas.
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          advanced: [{ focusMode: 'continuous' }],
+        },
       });
     } catch (erro) {
       marcarErro(campo, 'Não foi possível abrir a câmera. Verifique a permissão do navegador ou digite o código.');
@@ -122,6 +144,8 @@
     video.hidden = false;
     await video.play();
     botao.textContent = 'Parar câmera';
+    ajuda.textContent = 'Aponte para o código de barras, a uns 15 cm, com as barras na horizontal e bem iluminadas.';
+    falhas = 0;
     procurar();
   });
 
