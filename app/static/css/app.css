@@ -127,6 +127,8 @@ h2 { font-size: 1.2rem; margin: 2rem 0 0.5rem; }
 
 /* ---------------------------------------------------------- formularios */
 .campo { margin-bottom: 1rem; }
+.campos-linha { display: flex; flex-wrap: wrap; gap: 0 1rem; }
+.campos-linha .campo { flex: 1 1 10rem; }
 .campo label {
   display: block;
   font-weight: 600;

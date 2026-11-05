@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block titulo %}Encomendas pendentes{% endblock %}
+{% block titulo %}Encomendas{% endblock %}
 
 {% block conteudo %}
-<h1>Encomendas pendentes</h1>
+<h1>Encomendas</h1>
 
 <div class="cartao">
   <form id="form-busca" role="search" novalidate>
@@ -12,14 +12,24 @@
              aria-describedby="ajuda-busca">
       <small id="ajuda-busca" class="ajuda">A lista é atualizada conforme você digita.</small>
     </div>
-    <div class="campo">
-      <label for="situacao">Situação</label>
-      <select id="situacao" name="situacao">
-        <option value="RECEBIDA" selected>Aguardando retirada</option>
-        <option value="RETIRADA">Já retiradas</option>
-        <option value="DEVOLVIDA">Devolvidas</option>
-        <option value="">Todas</option>
-      </select>
+    <div class="campos-linha">
+      <div class="campo">
+        <label for="situacao">Situação</label>
+        <select id="situacao" name="situacao">
+          <option value="RECEBIDA" selected>Aguardando retirada</option>
+          <option value="RETIRADA">Já retiradas</option>
+          <option value="DEVOLVIDA">Devolvidas</option>
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="de">Recebidas de</label>
+        <input type="date" id="de" name="de">
+      </div>
+      <div class="campo">
+        <label for="ate">até</label>
+        <input type="date" id="ate" name="ate">
+      </div>
     </div>
   </form>
 </div>
@@ -35,6 +45,7 @@
         <th scope="col">Unidade</th>
         <th scope="col">Destinatário</th>
         <th scope="col">Recebida em</th>
+        <th scope="col" id="col-retirada" hidden>Retirada em</th>
         <th scope="col">Situação</th>
         <th scope="col">Ações</th>
       </tr>
