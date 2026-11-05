@@ -69,6 +69,7 @@
 (async function () {
   const botao = document.getElementById('ler-camera');
   const video = document.getElementById('video-camera');
+  const quadro = document.getElementById('quadro-camera');
   const campo = document.getElementById('codigo_rastreio');
   if (!botao || !('BarcodeDetector' in window)) return;
 
@@ -83,13 +84,18 @@
   const leitor = new BarcodeDetector({ formats: formatos });
   const ajuda = document.getElementById('ajuda-codigo');
   const ajudaOriginal = ajuda.textContent;
+  // Faixa central lida pelo detector, em fracoes da imagem; precisa
+  // bater com .camera__mira no CSS. Assim, numa etiqueta com varios
+  // codigos, vale so o que o porteiro alinhou na linha vermelha.
+  const MIRA = { x: 0.05, y: 0.35, largura: 0.9, altura: 0.3 };
+  const recorte = document.createElement('canvas');
   let fluxo = null;
   let falhas = 0;
 
   function parar() {
     if (fluxo) fluxo.getTracks().forEach((t) => t.stop());
     fluxo = null;
-    video.hidden = true;
+    quadro.hidden = true;
     botao.textContent = 'Ler com a câmera';
     ajuda.textContent = ajudaOriginal;
   }
@@ -97,9 +103,23 @@
   async function procurar() {
     if (!fluxo) return;
     try {
-      const achados = await leitor.detect(video);
+      const largura = video.videoWidth * MIRA.largura;
+      const altura = video.videoHeight * MIRA.altura;
+      recorte.width = largura;
+      recorte.height = altura;
+      recorte.getContext('2d').drawImage(
+        video,
+        video.videoWidth * MIRA.x, video.videoHeight * MIRA.y, largura, altura,
+        0, 0, largura, altura
+      );
+      const achados = await leitor.detect(recorte);
       falhas = 0;
       if (achados.length > 0) {
+        // Mais de um codigo na faixa: vale o mais perto da linha vermelha.
+        const meio = altura / 2;
+        const distancia = (a) =>
+          Math.abs(a.boundingBox.y + a.boundingBox.height / 2 - meio);
+        achados.sort((a, b) => distancia(a) - distancia(b));
         campo.value = achados[0].rawValue.trim().toUpperCase();
         limparErro(campo);
         parar();
@@ -141,10 +161,10 @@
       return;
     }
     video.srcObject = fluxo;
-    video.hidden = false;
+    quadro.hidden = false;
     await video.play();
     botao.textContent = 'Parar câmera';
-    ajuda.textContent = 'Aponte para o código de barras, a uns 15 cm, com as barras na horizontal e bem iluminadas.';
+    ajuda.textContent = 'Alinhe o código de barras do rastreio na linha vermelha, a uns 15 cm, com as barras na horizontal e bem iluminadas. Só o que está dentro do retângulo é lido.';
     falhas = 0;
     procurar();
   });
