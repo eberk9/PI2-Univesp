@@ -6,14 +6,23 @@
   const contador = document.getElementById('contador');
   const campoBusca = document.getElementById('q');
   const campoSituacao = document.getElementById('situacao');
+  const campoDe = document.getElementById('de');
+  const campoAte = document.getElementById('ate');
+  const colRetirada = document.getElementById('col-retirada');
   if (!corpo) return;
 
-  const COLUNAS = 6;
+  let COLUNAS = 6;
 
   async function carregar() {
     const parametros = new URLSearchParams();
     if (campoBusca.value.trim()) parametros.set('q', campoBusca.value.trim());
     if (campoSituacao.value) parametros.set('situacao', campoSituacao.value);
+    if (campoDe.value) parametros.set('de', campoDe.value);
+    if (campoAte.value) parametros.set('ate', campoAte.value);
+
+    // A coluna "Retirada em" so faz sentido fora da lista de pendentes.
+    colRetirada.hidden = campoSituacao.value === 'RECEBIDA';
+    COLUNAS = colRetirada.hidden ? 6 : 7;
 
     try {
       const dados = await chamarApi('/encomendas?' + parametros.toString());
@@ -83,9 +92,14 @@
         acoes.textContent = e.retirada_por_nome || '—';
       }
 
-      [codigo, unidade, destinatario, recebida, situacao, acoes].forEach((td) =>
-        tr.appendChild(td)
-      );
+      const colunas = [codigo, unidade, destinatario, recebida];
+      if (!colRetirada.hidden) {
+        const retirada = document.createElement('td');
+        retirada.textContent = e.retirada_em ? formatarDataHora(e.retirada_em) : '—';
+        colunas.push(retirada);
+      }
+      colunas.push(situacao, acoes);
+      colunas.forEach((td) => tr.appendChild(td));
       corpo.appendChild(tr);
     });
   }
@@ -177,6 +191,8 @@
 
   campoBusca.addEventListener('input', aguardar(carregar, 300));
   campoSituacao.addEventListener('change', carregar);
+  campoDe.addEventListener('change', carregar);
+  campoAte.addEventListener('change', carregar);
   document.getElementById('form-busca').addEventListener('submit', (ev) => {
     ev.preventDefault();
     carregar();

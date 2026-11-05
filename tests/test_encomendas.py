@@ -143,6 +143,17 @@ def test_situacao_invalida_no_filtro(porteiro_logado):
     assert porteiro_logado.get("/api/v1/encomendas?situacao=SUMIU").status_code == 400
 
 
+def test_listar_filtrando_por_periodo(porteiro_logado, unidade_id):
+    dia = registrar(porteiro_logado, unidade_id).get_json()["recebida_em"][:10]
+
+    def total(consulta):
+        return porteiro_logado.get(f"/api/v1/encomendas?{consulta}").get_json()["total"]
+
+    assert total(f"de={dia}&ate={dia}") == 1
+    assert total("de=2999-01-01") == 0
+    assert total("ate=2000-01-01") == 0
+
+
 def test_busca_por_codigo_e_por_destinatario(porteiro_logado, unidade_id):
     registrar(porteiro_logado, unidade_id, codigo="XY123", destinatario="Ana Ribeiro")
     registrar(porteiro_logado, unidade_id, codigo="ZW999", destinatario="Carlos Menezes")
