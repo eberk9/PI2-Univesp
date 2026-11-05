@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Painel do síndico{% endblock %}
+
+{% block conteudo %}
+<h1>Painel do síndico</h1>
+<p class="subtitulo">Situação das encomendas na portaria.</p>
+
+<p id="aviso-painel" class="contador" role="status" aria-live="polite">Carregando…</p>
+
+<ul class="indicadores" aria-label="Indicadores">
+  <li class="indicador"><span class="indicador__valor" id="ind-pendentes">—</span> <span class="indicador__rotulo">aguardando retirada</span></li>
+  <li class="indicador"><span class="indicador__valor" id="ind-retiradas">—</span> <span class="indicador__rotulo">já retiradas</span></li>
+  <li class="indicador"><span class="indicador__valor" id="ind-devolvidas">—</span> <span class="indicador__rotulo">devolvidas</span></li>
+  <li class="indicador"><span class="indicador__valor" id="ind-tempo">—</span> <span class="indicador__rotulo">tempo médio até a retirada</span></li>
+</ul>
+
+<h2>Aguardando há mais tempo</h2>
+<div class="tabela-rolagem" role="region" aria-labelledby="legenda-antigas" tabindex="0">
+  <table class="tabela">
+    <caption id="legenda-antigas" class="visualmente-oculto">Encomendas pendentes mais antigas</caption>
+    <thead>
+      <tr>
+        <th scope="col">Código</th>
+        <th scope="col">Unidade</th>
+        <th scope="col">Destinatário</th>
+        <th scope="col">Recebida em</th>
+      </tr>
+    </thead>
+    <tbody id="corpo-antigas"></tbody>
+  </table>
+</div>
+<p><a href="{{ url_for('main.pendentes') }}">Ver todas as encomendas</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/painel.js') }}"></script>
+{% endblock %}

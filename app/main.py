@@ -3,7 +3,7 @@ from flask import Blueprint, abort, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
 from app.extensions import db
-from app.models import Encomenda, Transportadora, Unidade
+from app.models import PERFIS, Encomenda, Transportadora, Unidade
 
 main_bp = Blueprint("main", __name__)
 
@@ -13,7 +13,25 @@ main_bp = Blueprint("main", __name__)
 def inicio():
     if current_user.e_morador():
         return redirect(url_for("main.minhas_encomendas"))
+    if current_user.e_sindico():
+        return redirect(url_for("main.painel"))
     return redirect(url_for("main.pendentes"))
+
+
+@main_bp.route("/painel")
+@login_required
+def painel():
+    if not current_user.e_sindico():
+        abort(403)
+    return render_template("painel.html")
+
+
+@main_bp.route("/cadastros")
+@login_required
+def cadastros():
+    if not current_user.e_sindico():
+        abort(403)
+    return render_template("cadastros.html", perfis=PERFIS)
 
 
 @main_bp.route("/encomendas/nova")

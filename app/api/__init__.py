@@ -41,4 +41,4 @@ def exige_perfil(*perfis):
     return decorador
 
 
-from app.api import encomendas, sessoes, unidades  # noqa: E402,F401
+from app.api import encomendas, sessoes, unidades, usuarios  # noqa: E402,F401

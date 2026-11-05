@@ -129,6 +129,19 @@ h2 { font-size: 1.2rem; margin: 2rem 0 0.5rem; }
 .campo { margin-bottom: 1rem; }
 .campos-linha { display: flex; flex-wrap: wrap; gap: 0 1rem; }
 .campos-linha .campo { flex: 1 1 10rem; }
+.acoes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* Painel do sindico */
+.indicadores {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem; list-style: none; margin: 0 0 2rem; padding: 0;
+}
+.indicador {
+  background: var(--superficie); border: 1px solid var(--borda-campo); border-radius: 0.5rem;
+  padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.25rem;
+}
+.indicador__valor { font-size: 2rem; font-weight: 700; color: var(--primaria); }
+.indicador__rotulo { color: var(--tinta-suave); font-size: 0.9rem; }
 .campo label {
   display: block;
   font-weight: 600;

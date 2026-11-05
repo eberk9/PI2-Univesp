@@ -109,6 +109,8 @@ class Usuario(UserMixin, db.Model):
             "email": self.email,
             "perfil": self.perfil,
             "unidade_id": self.unidade_id,
+            "unidade": self.unidade.identificacao if self.unidade else None,
+            "ativo": self.ativo,
         }
 
     def __repr__(self):
