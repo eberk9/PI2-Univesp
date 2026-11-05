@@ -1,4 +1,6 @@
 """Fabrica da aplicacao Flask."""
+import os
+
 from flask import Flask
 
 from app.extensions import db, login_manager, migrate
@@ -20,6 +22,15 @@ def create_app(config_object="config.Config"):
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp, url_prefix="/api/v1")
+
+    # Versao do arquivo na URL dos estaticos (?v=...): a cada publicacao
+    # o navegador baixa o CSS e o JS novos em vez de usar os do cache.
+    @app.url_defaults
+    def versionar_estaticos(endpoint, valores):
+        if endpoint == "static" and "filename" in valores:
+            caminho = os.path.join(app.static_folder, valores["filename"])
+            if os.path.isfile(caminho):
+                valores["v"] = int(os.path.getmtime(caminho))
 
     @app.shell_context_processor
     def contexto_shell():
