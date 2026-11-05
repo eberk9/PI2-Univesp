@@ -179,7 +179,19 @@ h2 { font-size: 1.2rem; margin: 2rem 0 0.5rem; }
 }
 .botao:disabled { opacity: 0.6; cursor: not-allowed; }
 .botao--camera { margin-top: 0.5rem; }
-.video-camera { display: block; width: 100%; max-width: 24rem; margin-top: 0.5rem; border-radius: 0.5rem; background: #000; }
+.camera { position: relative; max-width: 24rem; margin-top: 0.5rem; border-radius: 0.5rem; overflow: hidden; background: #000; }
+.camera__video { display: block; width: 100%; }
+/* Faixa de leitura: so o que esta dentro dela e lido (ver MIRA no JS). */
+.camera__mira {
+  position: absolute; left: 5%; right: 5%; top: 35%; height: 30%;
+  border: 2px solid rgba(255, 255, 255, 0.85); border-radius: 0.25rem;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+.camera__mira::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%;
+  border-top: 2px solid #e00;
+}
 [hidden] { display: none !important; }
 
 /* ---------------------------------------------------------- avisos */
