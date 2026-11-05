@@ -1,4 +1,4 @@
-/* Lista de encomendas com busca assincrona e baixa na retirada.
+/* Lista de encomendas com busca assincrona, baixa na retirada e devolucao.
    A baixa usa um formulario embutido na propria linha, e nao um dialogo
    do navegador: e mais acessivel e nao bloqueia a pagina. */
 (function () {
@@ -78,16 +78,18 @@
 
       const acoes = document.createElement('td');
       if (e.situacao === 'RECEBIDA') {
-        const botao = document.createElement('button');
-        botao.type = 'button';
-        botao.className = 'botao botao--secundario';
-        botao.textContent = 'Dar baixa';
-        botao.setAttribute(
-          'aria-label',
-          'Dar baixa na encomenda ' + e.codigo_rastreio
-        );
-        botao.addEventListener('click', () => abrirBaixa(e, tr, botao));
-        acoes.appendChild(botao);
+        const botoes = [BAIXA, DEVOLUCAO].map((acao) => {
+          const botao = document.createElement('button');
+          botao.type = 'button';
+          botao.className = 'botao botao--secundario';
+          botao.textContent = acao.botao;
+          botao.setAttribute('aria-label', acao.botao + ' na encomenda ' + e.codigo_rastreio);
+          return botao;
+        });
+        botoes[0].addEventListener('click', () => abrirAcao(BAIXA, e, tr, botoes));
+        botoes[1].addEventListener('click', () => abrirAcao(DEVOLUCAO, e, tr, botoes));
+        acoes.className = 'acoes';
+        acoes.append(...botoes);
       } else {
         acoes.textContent = e.retirada_por_nome || '—';
       }
@@ -104,17 +106,38 @@
     });
   }
 
-  /* Abre, logo abaixo da linha, o campo "quem retirou". */
-  function abrirBaixa(encomenda, linha, botao) {
+  /* Baixa (RF08) e devolucao (RF09) usam o mesmo formulario embutido. */
+  const BAIXA = {
+    botao: 'Dar baixa',
+    pergunta: (codigo) => 'Quem está retirando a encomenda ' + codigo + '?',
+    obrigatorio: 'Informe o nome de quem está retirando.',
+    confirmar: 'Confirmar retirada',
+    rota: '/retirada',
+    campo: 'retirada_por_nome',
+    aviso: (codigo, valor) => 'Baixa registrada: ' + codigo + ' retirada por ' + valor + '.',
+  };
+  const DEVOLUCAO = {
+    botao: 'Devolver',
+    pergunta: (codigo) =>
+      'Motivo da devolução da encomenda ' + codigo + ' à transportadora (opcional)',
+    obrigatorio: null,
+    confirmar: 'Confirmar devolução',
+    rota: '/devolucao',
+    campo: 'motivo',
+    aviso: (codigo) => 'Devolução registrada: ' + codigo + '.',
+  };
+
+  /* Abre, logo abaixo da linha, o campo da acao escolhida. */
+  function abrirAcao(acao, encomenda, linha, botoes) {
     if (linha.nextElementSibling &&
-        linha.nextElementSibling.dataset.baixa === String(encomenda.id)) {
+        linha.nextElementSibling.dataset.acao === String(encomenda.id)) {
       return;
     }
 
-    botao.disabled = true;
+    botoes.forEach((b) => { b.disabled = true; });
 
     const tr = document.createElement('tr');
-    tr.dataset.baixa = String(encomenda.id);
+    tr.dataset.acao = String(encomenda.id);
 
     const td = document.createElement('td');
     td.colSpan = COLUNAS;
@@ -122,22 +145,21 @@
     const form = document.createElement('form');
     form.className = 'campo campo--baixa';
 
-    const idCampo = 'quem-retirou-' + encomenda.id;
+    const idCampo = 'acao-' + encomenda.id;
     const rotulo = document.createElement('label');
     rotulo.htmlFor = idCampo;
-    rotulo.textContent =
-      'Quem está retirando a encomenda ' + encomenda.codigo_rastreio + '?';
+    rotulo.textContent = acao.pergunta(encomenda.codigo_rastreio);
 
     const entrada = document.createElement('input');
     entrada.type = 'text';
     entrada.id = idCampo;
-    entrada.required = true;
+    entrada.required = Boolean(acao.obrigatorio);
     entrada.autocomplete = 'off';
 
     const confirmar = document.createElement('button');
     confirmar.type = 'submit';
     confirmar.className = 'botao botao--primario';
-    confirmar.textContent = 'Confirmar retirada';
+    confirmar.textContent = acao.confirmar;
 
     const cancelar = document.createElement('button');
     cancelar.type = 'button';
@@ -146,8 +168,8 @@
 
     function fechar() {
       tr.remove();
-      botao.disabled = false;
-      botao.focus();
+      botoes.forEach((b) => { b.disabled = false; });
+      botoes[0].focus();
     }
 
     cancelar.addEventListener('click', fechar);
@@ -158,27 +180,29 @@
 
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const nome = entrada.value.trim();
-      if (!nome) {
-        marcarErro(entrada, 'Informe o nome de quem está retirando.');
+      const valor = entrada.value.trim();
+      if (!valor && acao.obrigatorio) {
+        marcarErro(entrada, acao.obrigatorio);
         entrada.focus();
         return;
       }
 
       confirmar.disabled = true;
       confirmar.textContent = 'Confirmando…';
+      const corpoJson = {};
+      if (valor) corpoJson[acao.campo] = valor;
       try {
-        await chamarApi('/encomendas/' + encomenda.id + '/retirada', {
+        await chamarApi('/encomendas/' + encomenda.id + acao.rota, {
           method: 'POST',
-          body: JSON.stringify({ retirada_por_nome: nome }),
+          body: JSON.stringify(corpoJson),
         });
-        contador.textContent =
-          'Baixa registrada: ' + encomenda.codigo_rastreio + ' retirada por ' + nome + '.';
+        // Recarrega antes de avisar: carregar() reescreve o contador.
         await carregar();
+        contador.textContent = acao.aviso(encomenda.codigo_rastreio, valor);
       } catch (erro) {
         marcarErro(entrada, erro.message);
         confirmar.disabled = false;
-        confirmar.textContent = 'Confirmar retirada';
+        confirmar.textContent = acao.confirmar;
       }
     });
 

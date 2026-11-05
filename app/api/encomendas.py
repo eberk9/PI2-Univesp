@@ -230,6 +230,9 @@ def indicadores():
     pendentes = db.session.scalar(
         db.select(db.func.count(Encomenda.id)).filter_by(situacao=SITUACAO_RECEBIDA)
     )
+    devolvidas = db.session.scalar(
+        db.select(db.func.count(Encomenda.id)).filter_by(situacao=SITUACAO_DEVOLVIDA)
+    )
     retiradas = db.session.scalars(
         db.select(Encomenda).filter_by(situacao=SITUACAO_RETIRADA)
     ).all()
@@ -245,6 +248,7 @@ def indicadores():
         {
             "pendentes": pendentes,
             "retiradas": len(retiradas),
+            "devolvidas": devolvidas,
             "tempo_medio_retirada_horas": media,
         }
     )

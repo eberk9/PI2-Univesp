@@ -22,9 +22,15 @@
     </div>
     <nav class="cabecalho__nav" aria-label="Navegação principal">
       <ul>
+        {% if current_user.e_sindico() %}
+          <li><a href="{{ url_for('main.painel') }}"{% if request.endpoint == 'main.painel' %} aria-current="page"{% endif %}>Painel</a></li>
+        {% endif %}
         {% if not current_user.e_morador() %}
           <li><a href="{{ url_for('main.pendentes') }}"{% if request.endpoint == 'main.pendentes' %} aria-current="page"{% endif %}>Encomendas</a></li>
           <li><a href="{{ url_for('main.nova_encomenda') }}"{% if request.endpoint == 'main.nova_encomenda' %} aria-current="page"{% endif %}>Registrar encomenda</a></li>
+          {% if current_user.e_sindico() %}
+            <li><a href="{{ url_for('main.cadastros') }}"{% if request.endpoint == 'main.cadastros' %} aria-current="page"{% endif %}>Cadastros</a></li>
+          {% endif %}
         {% else %}
           <li><a href="{{ url_for('main.minhas_encomendas') }}"{% if request.endpoint == 'main.minhas_encomendas' %} aria-current="page"{% endif %}>Minhas encomendas</a></li>
         {% endif %}
