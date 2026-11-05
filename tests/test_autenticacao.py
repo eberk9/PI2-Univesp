@@ -51,3 +51,8 @@ def test_pagina_protegida_redireciona_para_login(client):
     resposta = client.get("/encomendas/pendentes")
     assert resposta.status_code == 302
     assert "/login" in resposta.headers["Location"]
+
+
+def test_estaticos_levam_versao_na_url(client):
+    pagina = client.get("/login").get_data(as_text=True)
+    assert "/static/css/app.css?v=" in pagina
