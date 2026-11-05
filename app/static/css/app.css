@@ -178,6 +178,9 @@ h2 { font-size: 1.2rem; margin: 2rem 0 0.5rem; }
   font-size: 0.9rem;
 }
 .botao:disabled { opacity: 0.6; cursor: not-allowed; }
+.botao--camera { margin-top: 0.5rem; }
+.video-camera { display: block; width: 100%; max-width: 24rem; margin-top: 0.5rem; border-radius: 0.5rem; background: #000; }
+[hidden] { display: none !important; }
 
 /* ---------------------------------------------------------- avisos */
 .aviso {
